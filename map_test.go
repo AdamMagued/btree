@@ -1213,6 +1213,41 @@ func TestMapIterSeekPrefix(t *testing.T) {
 	}
 }
 
+func TestMapIterPrevAtStart(t *testing.T) {
+	var tr Map[int, int]
+	tr.Set(1, 10)
+	tr.Set(2, 20)
+	tr.Set(3, 30)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(!iter.Next())
+	assert(iter.Prev() && iter.Key() == 2)
+	assert(iter.Prev() && iter.Key() == 1)
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestMapIterNextAtEndAfterSeek(t *testing.T) {
+	var tr Map[int, int]
+	tr.Set(1, 10)
+	tr.Set(2, 20)
+	tr.Set(3, 30)
+
+	iter := tr.Iter()
+
+	assert(iter.First())
+	assert(!iter.Prev())
+	assert(iter.Seek(3) && iter.Key() == 3)
+	assert(!iter.Next())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
 func copyMapEntries(m *Map[int, int]) []mapPair[int, int] {
 	all := make([]mapPair[int, int], m.Len())
 	keys := m.Keys()

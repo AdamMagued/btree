@@ -1480,6 +1480,47 @@ func TestGenericIterSeekPrefix(t *testing.T) {
 	}
 }
 
+func TestGenericIterPrevAtStart(t *testing.T) {
+	tr := NewBTreeG(func(a, b int) bool {
+		return a < b
+	})
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(!iter.Next())
+	assert(iter.Prev() && iter.Item() == 2)
+	assert(iter.Prev() && iter.Item() == 1)
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestGenericIterNextAtEndAfterSeek(t *testing.T) {
+	tr := NewBTreeG(func(a, b int) bool {
+		return a < b
+	})
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.First())
+	assert(!iter.Prev())
+	assert(iter.Seek(3) && iter.Item() == 3)
+	assert(!iter.Next())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
 func testContiguousDelete(t *testing.T, bench bool, withskips bool, sorted bool,
 	delop func(tr *BTreeG[int], window, skips []int),
 	checkop func(tr *BTreeG[int], window, skips []int),

@@ -316,3 +316,40 @@ func TestSeek(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestIterPrevAtStart(t *testing.T) {
+	tr := New(intLess)
+	tr.Load(1)
+	tr.Load(2)
+	tr.Load(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(!iter.Next())
+	assert(iter.Prev() && iter.Item() == 2)
+	assert(iter.Prev() && iter.Item() == 1)
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestIterNextAtEndAfterSeek(t *testing.T) {
+	tr := New(intLess)
+	tr.Load(1)
+	tr.Load(2)
+	tr.Load(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.First())
+	assert(!iter.Prev())
+	assert(iter.Seek(3) && iter.Item() == 3)
+	assert(!iter.Next())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}

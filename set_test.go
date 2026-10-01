@@ -232,6 +232,41 @@ func TestSetIter(t *testing.T) {
 	}
 }
 
+func TestSetIterPrevAtStart(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(!iter.Next())
+	assert(iter.Prev() && iter.Key() == 2)
+	assert(iter.Prev() && iter.Key() == 1)
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestSetIterNextAtEndAfterSeek(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+
+	assert(iter.First())
+	assert(!iter.Prev())
+	assert(iter.Seek(3) && iter.Key() == 3)
+	assert(!iter.Next())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
 func copySetEntries(m *Set[int]) []int {
 	all := m.Keys()
 	sort.Ints(all)
