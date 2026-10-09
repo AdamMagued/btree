@@ -321,3 +321,75 @@ func TestSetCopy(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestSetIterPrevAtStart(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(iter.Key() == 3)
+
+	assert(!iter.Next())
+
+	assert(iter.Prev())
+	assert(iter.Key() == 2)
+
+	assert(iter.Prev())
+	assert(iter.Key() == 1)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestSetIterNextAtEndAfterSeek(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+
+	assert(iter.First())
+	assert(iter.Key() == 1)
+
+	assert(!iter.Prev())
+
+	assert(iter.Seek(3))
+	assert(iter.Key() == 3)
+
+	assert(!iter.Next())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
+func TestSetIterPrevAtStartAfterSeek(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(iter.Key() == 3)
+
+	assert(!iter.Next())
+
+	assert(iter.Seek(1))
+	assert(iter.Key() == 1)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}

@@ -316,3 +316,81 @@ func TestSeek(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestIterPrevAtStart(t *testing.T) {
+	lt := func(a, b interface{}) bool { return a.(int) < b.(int) }
+	tr := New(lt)
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(iter.Item() == 3)
+
+	assert(!iter.Next())
+
+	assert(iter.Prev())
+	assert(iter.Item() == 2)
+
+	assert(iter.Prev())
+	assert(iter.Item() == 1)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestIterNextAtEndAfterSeek(t *testing.T) {
+	lt := func(a, b interface{}) bool { return a.(int) < b.(int) }
+	tr := New(lt)
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.First())
+	assert(iter.Item() == 1)
+
+	assert(!iter.Prev())
+
+	assert(iter.Seek(3))
+	assert(iter.Item() == 3)
+
+	assert(!iter.Next())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
+func TestIterPrevAtStartAfterSeek(t *testing.T) {
+	lt := func(a, b interface{}) bool { return a.(int) < b.(int) }
+	tr := New(lt)
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(iter.Item() == 3)
+
+	assert(!iter.Next())
+
+	assert(iter.Seek(1))
+	assert(iter.Item() == 1)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}

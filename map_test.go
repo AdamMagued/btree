@@ -1484,3 +1484,75 @@ func TestMapDeepCopy(t *testing.T) {
 	assert(count1 == Ncols*Nvals/2)
 	assert(count2 == Ncols*Nvals/2)
 }
+
+func TestMapIterPrevAtStart(t *testing.T) {
+	var tr Map[int, int]
+	tr.Set(1, 10)
+	tr.Set(2, 20)
+	tr.Set(3, 30)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(iter.Key() == 3 && iter.Value() == 30)
+
+	assert(!iter.Next())
+
+	assert(iter.Prev())
+	assert(iter.Key() == 2 && iter.Value() == 20)
+
+	assert(iter.Prev())
+	assert(iter.Key() == 1 && iter.Value() == 10)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestMapIterNextAtEndAfterSeek(t *testing.T) {
+	var tr Map[int, int]
+	tr.Set(1, 10)
+	tr.Set(2, 20)
+	tr.Set(3, 30)
+
+	iter := tr.Iter()
+
+	assert(iter.First())
+	assert(iter.Key() == 1 && iter.Value() == 10)
+
+	assert(!iter.Prev())
+
+	assert(iter.Seek(3))
+	assert(iter.Key() == 3 && iter.Value() == 30)
+
+	assert(!iter.Next())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Next())
+	}
+}
+
+func TestMapIterPrevAtStartAfterSeek(t *testing.T) {
+	var tr Map[int, int]
+	tr.Set(1, 10)
+	tr.Set(2, 20)
+	tr.Set(3, 30)
+
+	iter := tr.Iter()
+
+	assert(iter.Last())
+	assert(iter.Key() == 3 && iter.Value() == 30)
+
+	assert(!iter.Next())
+
+	assert(iter.Seek(1))
+	assert(iter.Key() == 1 && iter.Value() == 10)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
