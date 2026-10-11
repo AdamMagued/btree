@@ -321,3 +321,58 @@ func TestSetCopy(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestSetIterPrevAtStart(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+	if !iter.Last() {
+		t.Fatal("expected Last to succeed")
+	}
+	if iter.Next() {
+		t.Fatal("expected Next past Last to return false")
+	}
+	if !iter.Prev() || iter.Key() != 2 {
+		t.Fatalf("expected Prev to return 2, got %v", iter.Key())
+	}
+	if !iter.Prev() || iter.Key() != 1 {
+		t.Fatalf("expected Prev to return 1, got %v", iter.Key())
+	}
+	if iter.Prev() {
+		t.Fatal("expected Prev before First to return false")
+	}
+	for i := 0; i < 5; i++ {
+		if iter.Prev() {
+			t.Fatalf("call %d: expected Prev before First to continue returning false", i)
+		}
+	}
+}
+
+func TestSetIterNextAtEndAfterSeek(t *testing.T) {
+	var tr Set[int]
+	tr.Insert(1)
+	tr.Insert(2)
+	tr.Insert(3)
+
+	iter := tr.Iter()
+	if !iter.First() {
+		t.Fatal("expected First to succeed")
+	}
+	if iter.Prev() {
+		t.Fatal("expected Prev before First to return false")
+	}
+	if !iter.Seek(3) {
+		t.Fatal("expected Seek(3) to succeed")
+	}
+	if iter.Next() {
+		t.Fatal("expected Next past 3 to return false")
+	}
+	for i := 0; i < 5; i++ {
+		if iter.Next() {
+			t.Fatalf("call %d: expected Next past end to continue returning false", i)
+		}
+	}
+}
