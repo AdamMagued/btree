@@ -1982,3 +1982,60 @@ func TestBenchmarkIteratorReuseWorks(t *testing.T) {
 		reusableIter.Release()
 	}
 }
+
+func TestGenericIterPrevAtStart(t *testing.T) {
+	tr := NewBTreeG[int](func(a, b int) bool { return a < b })
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	if !iter.Last() {
+		t.Fatal("expected Last to succeed")
+	}
+	if iter.Next() {
+		t.Fatal("expected Next past Last to return false")
+	}
+	if !iter.Prev() || iter.Item() != 2 {
+		t.Fatalf("expected Prev to return 2, got %v", iter.Item())
+	}
+	if !iter.Prev() || iter.Item() != 1 {
+		t.Fatalf("expected Prev to return 1, got %v", iter.Item())
+	}
+	if iter.Prev() {
+		t.Fatal("expected Prev before First to return false")
+	}
+	for i := 0; i < 5; i++ {
+		if iter.Prev() {
+			t.Fatalf("call %d: expected Prev before First to continue returning false", i)
+		}
+	}
+	iter.Release()
+}
+
+func TestGenericIterNextAtEndAfterSeek(t *testing.T) {
+	tr := NewBTreeG[int](func(a, b int) bool { return a < b })
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	if !iter.First() {
+		t.Fatal("expected First to succeed")
+	}
+	if iter.Prev() {
+		t.Fatal("expected Prev before First to return false")
+	}
+	if !iter.Seek(3) {
+		t.Fatal("expected Seek(3) to succeed")
+	}
+	if iter.Next() {
+		t.Fatal("expected Next past 3 to return false")
+	}
+	for i := 0; i < 5; i++ {
+		if iter.Next() {
+			t.Fatalf("call %d: expected Next past end to continue returning false", i)
+		}
+	}
+	iter.Release()
+}

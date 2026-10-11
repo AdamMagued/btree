@@ -316,3 +316,34 @@ func TestSeek(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestIterPrevAtStart(t *testing.T) {
+	lt := func(a, b interface{}) bool { return a.(int) < b.(int) }
+	tr := New(lt)
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	if !iter.Last() {
+		t.Fatal("expected Last to succeed")
+	}
+	if iter.Next() {
+		t.Fatal("expected Next past Last to return false")
+	}
+	if !iter.Prev() || iter.Item() != 2 {
+		t.Fatalf("expected Prev to return 2, got %v", iter.Item())
+	}
+	if !iter.Prev() || iter.Item() != 1 {
+		t.Fatalf("expected Prev to return 1, got %v", iter.Item())
+	}
+	if iter.Prev() {
+		t.Fatal("expected Prev before First to return false")
+	}
+	for i := 0; i < 5; i++ {
+		if iter.Prev() {
+			t.Fatalf("call %d: expected Prev before First to continue returning false", i)
+		}
+	}
+	iter.Release()
+}
