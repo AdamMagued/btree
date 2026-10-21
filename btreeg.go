@@ -1607,6 +1607,8 @@ func (iter *IterG[T]) seek(key T, hint *PathHint) bool {
 	if iter.tr == nil {
 		return false
 	}
+	iter.atend = false
+	iter.atstart = false
 	iter.seeked = true
 	iter.stack = iter.stack[:0]
 	if iter.tr.root == nil {
@@ -1662,6 +1664,8 @@ func (iter *IterG[T]) Last() bool {
 	if iter.tr == nil {
 		return false
 	}
+	iter.atend = false
+	iter.atstart = false
 	iter.seeked = true
 	iter.stack = iter.stack[:0]
 	if iter.tr.root == nil {
@@ -1741,6 +1745,7 @@ func (iter *IterG[T]) Next() bool {
 				iter.stack = iter.stack[:len(iter.stack)-1]
 				if len(iter.stack) == 0 {
 					iter.atend = true
+					iter.atstart = false
 					return false
 				}
 				s = &iter.stack[len(iter.stack)-1]
@@ -1788,6 +1793,7 @@ func (iter *IterG[T]) Prev() bool {
 				iter.stack = iter.stack[:len(iter.stack)-1]
 				if len(iter.stack) == 0 {
 					iter.atstart = true
+					iter.atend = false
 					return false
 				}
 				s = &iter.stack[len(iter.stack)-1]

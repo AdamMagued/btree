@@ -316,3 +316,88 @@ func TestSeek(t *testing.T) {
 		panic("!")
 	}
 }
+
+func TestIterIssue46PrevPastStart(t *testing.T) {
+	tr := New(func(a, b any) bool {
+		return a.(int) < b.(int)
+	})
+	tr.Set(1)
+	tr.Set(2)
+	tr.Set(3)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(iter.Item() == 3)
+
+	assert(!iter.Next())
+
+	assert(iter.Prev())
+	assert(iter.Item() == 2)
+
+	assert(iter.Prev())
+	assert(iter.Item() == 1)
+
+	assert(!iter.Prev())
+
+	for i := 0; i < 10; i++ {
+		assert(!iter.Prev())
+	}
+
+	assert(iter.Next())
+	assert(iter.Item() == 2)
+	assert(iter.Next())
+	assert(iter.Item() == 3)
+	assert(!iter.Next())
+	for i := 0; i < 10; i++ {
+		assert(!iter.Next())
+	}
+}
+
+func TestIterIssue46PrevPastStartSingleItem(t *testing.T) {
+	tr := New(func(a, b any) bool {
+		return a.(int) < b.(int)
+	})
+	tr.Set(42)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(iter.Item() == 42)
+
+	assert(!iter.Next())
+
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
+func TestIterIssue46SeekPrevPastStart(t *testing.T) {
+	tr := New(func(a, b any) bool {
+		return a.(int) < b.(int)
+	})
+	tr.Set(10)
+	tr.Set(20)
+	tr.Set(30)
+
+	iter := tr.Iter()
+	defer iter.Release()
+
+	assert(iter.Last())
+	assert(!iter.Next())
+
+	assert(iter.Seek(20))
+	assert(iter.Item() == 20)
+
+	assert(iter.Prev())
+	assert(iter.Item() == 10)
+
+	assert(!iter.Prev())
+	for i := 0; i < 5; i++ {
+		assert(!iter.Prev())
+	}
+}
+
